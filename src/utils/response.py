@@ -1,15 +1,61 @@
-
 from sdks.novavision.src.helper.package import PackageHelper
-from components.Package.src.models.PackageModel import PackageModel, PackageConfigs, ConfigExecutor, PackageOutputs, PackageResponse, PackageExecutor, OutputImage
+from components.ImageProcessingDemo.src.models.PackageModel import (
+    PackageModel,
+    PackageConfigs,
+    ConfigExecutor,
+
+    EnhanceExecutor,
+    EnhanceResponse,
+    EnhanceOutputs,
+    OutputEnhancedImage,
+
+    BlendExecutor,
+    BlendResponse,
+    BlendOutputs,
+    OutputBlendedImage,
+    OutputMaskImage
+)
 
 
-def build_response(context):
-    outputImage = OutputImage(value=context.image)
-    Outputs = PackageOutputs(outputImage=outputImage)
-    packageResponse = PackageResponse(outputs=Outputs)
-    packageExecutor = PackageExecutor(value=packageResponse)
-    executor = ConfigExecutor(value=packageExecutor)
+def build_response_enhance(context):
+    """
+    Response builder for Enhance executor
+    """
+    outputEnhanced = OutputEnhancedImage(value=context.outputEnhanced)
+
+    outputs = EnhanceOutputs(
+        outputEnhancedImage=outputEnhanced
+    )
+
+    response = EnhanceResponse(outputs=outputs)
+
+    enhanceExecutor = EnhanceExecutor(value=response)
+    executor = ConfigExecutor(value=enhanceExecutor)
+
     packageConfigs = PackageConfigs(executor=executor)
     package = PackageHelper(packageModel=PackageModel, packageConfigs=packageConfigs)
-    packageModel = package.build_model(context)
-    return packageModel
+
+    return package.build_model(context)
+
+
+def build_response_blend(context):
+    """
+    Response builder for Blend executor
+    """
+    blended = OutputBlendedImage(value=context.outputBlended)
+    mask = OutputMaskImage(value=context.outputMask)
+
+    outputs = BlendOutputs(
+        outputBlendedImage=blended,
+        outputMaskImage=mask
+    )
+
+    response = BlendResponse(outputs=outputs)
+
+    blendExecutor = BlendExecutor(value=response)
+    executor = ConfigExecutor(value=blendExecutor)
+
+    packageConfigs = PackageConfigs(executor=executor)
+    package = PackageHelper(packageModel=PackageModel, packageConfigs=packageConfigs)
+
+    return package.build_model(context)

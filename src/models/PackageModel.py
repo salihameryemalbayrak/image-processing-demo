@@ -1,106 +1,166 @@
 
-from pydantic import Field, validator
-from typing import List, Optional, Union, Literal
-from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
+from pydantic import Field
+from typing import Optional, Union, Literal
+from sdks.novavision.src.base.model import Package, Config, Inputs, Configs, Outputs, Response, Request, Output, Input, Image
 
 
 class InputImage(Input):
     name: Literal["inputImage"] = "inputImage"
-    value: Union[List[Image], Image]
-    type: str = "object"
-
-    @validator("type", pre=True, always=True)
-    def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
-            return "object"
-        elif isinstance(value, list):
-            return "list"
-
-    class Config:
-        title = "Image"
-
-
-class OutputImage(Output):
-    name: Literal["outputImage"] = "outputImage"
-    value: Union[List[Image],Image]
-    type: str = "object"
-
-    @validator("type", pre=True, always=True)
-    def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
-            return "object"
-        elif isinstance(value, list):
-            return "list"
-
-    class Config:
-        title = "Image"
-
-
-class KeepSideFalse(Config):
-    name: Literal["False"] = "False"
-    value: Literal[False] = False
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Disable"
-
-
-class KeepSideTrue(Config):
-    name: Literal["True"] = "True"
-    value: Literal[True] = True
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Enable"
-
-
-class KeepSideBBox(Config):
-    """
-        Rotate image without catting off sides.
-    """
-    name: Literal["KeepSide"] = "KeepSide"
-    value: Union[KeepSideTrue, KeepSideFalse]
+    value: Image
     type: Literal["object"] = "object"
+
+    class Config:
+        title = "Input Image"
+
+
+class InputImageA(Input):
+    name: Literal["inputImageA"] = "inputImageA"
+    value: Image
+    type: Literal["object"] = "object"
+
+    class Config:
+        title = "Image A"
+
+
+class InputImageB(Input):
+    name: Literal["inputImageB"] = "inputImageB"
+    value: Image
+    type: Literal["object"] = "object"
+
+    class Config:
+        title = "Image B"
+
+
+class OutputEnhancedImage(Output):
+    name: Literal["outputEnhancedImage"] = "outputEnhancedImage"
+    value: Image
+    type: Literal["object"] = "object"
+
+    class Config:
+        title = "Enhanced Image"
+
+
+class OutputBlendedImage(Output):
+    name: Literal["outputBlendedImage"] = "outputBlendedImage"
+    value: Image
+    type: Literal["object"] = "object"
+
+    class Config:
+        title = "Blended Image"
+
+
+class OutputMaskImage(Output):
+    name: Literal["outputMaskImage"] = "outputMaskImage"
+    value: Image
+    type: Literal["object"] = "object"
+
+    class Config:
+        title = "Mask Image"
+
+
+class ConfigEnhanceType(Config):
+    """
+    Which enhancement method to apply
+    """
+    name: Literal["enhanceType"] = "enhanceType"
+    value: Literal["brightness", "contrast", "sharpen", "blur"]
+    type: Literal["string"] = "string"
     field: Literal["dropdownlist"] = "dropdownlist"
 
     class Config:
-        title = "Keep Sides"
+        title = "Enhancement Method"
 
 
-class Degree(Config):
+class ConfigEnhanceAmount(Config):
     """
-        Positive angles specify counterclockwise rotation while negative angles indicate clockwise rotation.
+    Strength of enhancement
     """
-    name: Literal["Degree"] = "Degree"
-    value: int = Field(ge=-359.0, le=359.0,default=0)
+    name: Literal["enhanceAmount"] = "enhanceAmount"
+    value: int = Field(default=20, ge=1, le=100)
     type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
-    placeHolder: Literal["[-359, 359]"] = "[-359, 359]"
 
     class Config:
-        title = "Angle"
+        title = "Enhancement Amount"
 
-
-class PackageInputs(Inputs):
+class EnhanceInputs(Inputs):
     inputImage: InputImage
 
 
-class PackageConfigs(Configs):
-    degree: Degree
-    drawBBox: KeepSideBBox
+class EnhanceConfigs(Configs):
+    enhanceType: ConfigEnhanceType
+    enhanceAmount: ConfigEnhanceAmount
 
 
-class PackageOutputs(Outputs):
-    outputImage: OutputImage
+class EnhanceOutputs(Outputs):
+    outputEnhancedImage: OutputEnhancedImage
 
 
-class PackageRequest(Request):
-    inputs: Optional[PackageInputs]
-    configs: PackageConfigs
+class EnhanceRequest(Request):
+    inputs: EnhanceInputs
+    configs: EnhanceConfigs
+
+    class Config:
+        json_schema_extra = {"target": "configs"}
+
+
+class EnhanceResponse(Response):
+    outputs: EnhanceOutputs
+
+
+class EnhanceExecutor(Config):
+    name: Literal["Enhance"] = "Enhance"
+    value: Union[EnhanceRequest, EnhanceResponse]
+    type: Literal["object"] = "object"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Enhance"
+        json_schema_extra = {
+            "target": {
+                "value": 0
+            }
+        }
+
+
+class ConfigBlendAlpha(Config):
+    name: Literal["blendAlpha"] = "blendAlpha"
+    value: float = Field(default=0.5, ge=0.0, le=1.0)
+    type: Literal["number"] = "number"
+    field: Literal["textInput"] = "textInput"
+
+    class Config:
+        title = "Alpha"
+
+
+class ConfigBlendBeta(Config):
+    name: Literal["blendBeta"] = "blendBeta"
+    value: float = Field(default=0.5, ge=0.0, le=1.0)
+    type: Literal["number"] = "number"
+    field: Literal["textInput"] = "textInput"
+
+    class Config:
+        title = "Beta"
+
+
+class BlendInputs(Inputs):
+    inputImageA: InputImageA
+    inputImageB: InputImageB
+
+
+class BlendConfigs(Configs):
+    blendAlpha: ConfigBlendAlpha
+    blendBeta: ConfigBlendBeta
+
+
+class BlendOutputs(Outputs):
+    outputBlendedImage: OutputBlendedImage   ###iki output nasıl koyacağım
+    outputMaskImage: OutputMaskImage
+
+
+class BlendRequest(Request):
+    inputs: Optional[BlendInputs]     #optional nsıl kullanılıcak???
+    configs: BlendConfigs
 
     class Config:
         json_schema_extra = {
@@ -108,18 +168,18 @@ class PackageRequest(Request):
         }
 
 
-class PackageResponse(Response):
-    outputs: PackageOutputs
+class BlendResponse(Response):
+    outputs: BlendOutputs
 
 
-class PackageExecutor(Config):
-    name: Literal["Package"] = "Package"
-    value: Union[PackageRequest, PackageResponse]
+class BlendExecutor(Config):
+    name: Literal["Blend"] = "Blend"
+    value: Union[BlendRequest, BlendResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Package"
+        title = "Blend"
         json_schema_extra = {
             "target": {
                 "value": 0
@@ -129,15 +189,13 @@ class PackageExecutor(Config):
 
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: Union[PackageExecutor]
+    value: Union[EnhanceExecutor, BlendExecutor]
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    restart: Literal[True] = True      #bu olmalı mı emin değilim
 
     class Config:
-        title = "Task"
-        json_schema_extra = {
-            "target": "value"
-        }
+        title = "Type"
 
 
 class PackageConfigs(Configs):
@@ -145,6 +203,6 @@ class PackageConfigs(Configs):
 
 
 class PackageModel(Package):
+    name: Literal["ImageProcessingDemo"] = "ImageProcessingDemo"
     configs: PackageConfigs
     type: Literal["component"] = "component"
-    name: Literal["Package"] = "Package"
