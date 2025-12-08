@@ -1,9 +1,9 @@
 import os
-import cv2
 import sys
+import cv2
 import numpy as np
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../../../'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../../"))
 
 from sdks.novavision.src.media.image import Image
 from sdks.novavision.src.base.component import Component
@@ -17,40 +17,57 @@ class Blend(Component):
         super().__init__(request, bootstrap)
         self.request.model = PackageModel(**self.request.data)
 
-        self.img1 = self.request.get_param("inputImageOne")
-        self.img2 = self.request.get_param("inputImageTwo")
+        self.imageA = self.request.get_param("inputImageA")
+        self.imageB = self.request.get_param("inputImageB")
 
-        self.mode = self.request.get_param("ConfigBlendType")
-        self.value = self.request.get_param(f"{self.mode}Value")
+        self.mode = self.request.get_param("configBlendMode")
+
+        if self.mode == "alphaBlend":
+            self.strength = self.request.get_param("configBlendStrength")
+        elif self.mode == "maskBlend":
+            self.smooth = self.request.get_param("configUseSmoothMask")
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
         return {}
 
-    def blend_images(self, a, b):
-        a = np.asarray(a).astype(np.float32)
-        b = np.asarray(b).astype(np.float32)
-
-        mask = cv2.absdiff(a, b).astype(np.uint8)
-
-        blended = cv2.addWeighted(a, 0.5, b, 0.5, 0)
-
-        return blended.astype(np.uint8), mask
+    def resize_to_match(self, A, B):
+        if A.shape[:2] != B.shape[:2]:
+            B = cv2.resize(B, (A.shape[1], A.shape[0]))
+        return A, B
 
     def run(self):
-        img1 = Image.get_frame(img=self.img1, redis_db=self.redis_db)
-        img2 = Image.get_frame(img=self.img2, redis_db=self.redis_db)
+        imgA = Image.get_frame(self.imageA, self.redis_db)
+        imgB = Image.get_frame(self.imageB, self.redis_db)
 
-        blended, mask = self.blend_images(img1.value, img2.value)
+        A = np.asarray(imgA.value, dtype=np.uint8)
+        B = np.asarray(imgB.value, dtype=np.uint8)
 
-        img1.value = blended
-        img2.value = mask
+        A, B = self.resize_to_match(A, B)
 
-        self.outputBlended = Image.set_frame(img=img1, package_uID=self.uID, redis_db=self.redis_db)
-        self.outputMask = Image.set_frame(img=img2, package_uID=self.uID, redis_db=self.redis_db)
+        if self.mode == "alphaBlend":
+            alpha = float(self.strength)
+            blended = cv2.addWeighted(A, alpha, B, 1 - alpha, 0)
+            mask = cv2.absdiff(A, B)
+
+        else:
+            diff = cv2.absdiff(A, B)
+            mask = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+            if bool(self.smooth):
+                mask = cv2.GaussianBlur(mask, (7, 7), 0)
+            mask3 = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+            mask_f = mask3.astype(np.float32) / 255.0
+            blended = (A * mask_f + B * (1 - mask_f)).astype(np.uint8)
+            mask = mask3
+
+        imgA.value = blended
+        self.blended_image = Image.set_frame(imgA, self.uID, self.redis_db)
+
+        imgB.value = mask
+        self.mask_image = Image.set_frame(imgB, self.uID, self.redis_db)
 
         return build_response_blend(self)
 
 
-if __name__ == "__main__":
+if "__main__" == __name__:
     Executor(sys.argv[1]).run()

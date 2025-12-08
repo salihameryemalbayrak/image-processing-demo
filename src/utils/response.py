@@ -1,61 +1,40 @@
 from sdks.novavision.src.helper.package import PackageHelper
 from components.ImageProcessingDemo.src.models.PackageModel import (
-    PackageModel,
     PackageConfigs,
     ConfigExecutor,
-
+    PackageModel,
+    OutputEnhancedImage,
+    EnhanceOutputs,
     EnhanceExecutor,
     EnhanceResponse,
-    EnhanceOutputs,
-    OutputEnhancedImage,
-
-    BlendExecutor,
-    BlendResponse,
-    BlendOutputs,
     OutputBlendedImage,
-    OutputMaskImage
+    OutputMaskImage,
+    BlendOutputs,
+    BlendExecutor,
+    BlendResponse
 )
 
 
 def build_response_enhance(context):
-    """
-    Response builder for Enhance executor
-    """
-    outputEnhanced = OutputEnhancedImage(value=context.outputEnhanced)
-
-    outputs = EnhanceOutputs(
-        outputEnhancedImage=outputEnhanced
-    )
-
-    response = EnhanceResponse(outputs=outputs)
-
-    enhanceExecutor = EnhanceExecutor(value=response)
+    outputEnhancedImage = OutputEnhancedImage(value=context.enhanced_image)
+    enhanceOutputs = EnhanceOutputs(outputEnhancedImage=outputEnhancedImage)
+    enhanceResponse = EnhanceResponse(outputs=enhanceOutputs)
+    enhanceExecutor = EnhanceExecutor(value=enhanceResponse)
     executor = ConfigExecutor(value=enhanceExecutor)
-
-    packageConfigs = PackageConfigs(executor=executor)
+    packageConfigs = PackageConfigs(configExecutor=executor)
     package = PackageHelper(packageModel=PackageModel, packageConfigs=packageConfigs)
-
-    return package.build_model(context)
+    packageModel = package.build_model(context)
+    return packageModel
 
 
 def build_response_blend(context):
-    """
-    Response builder for Blend executor
-    """
-    blended = OutputBlendedImage(value=context.outputBlended)
-    mask = OutputMaskImage(value=context.outputMask)
-
-    outputs = BlendOutputs(
-        outputBlendedImage=blended,
-        outputMaskImage=mask
-    )
-
-    response = BlendResponse(outputs=outputs)
-
-    blendExecutor = BlendExecutor(value=response)
+    outputBlendedImage = OutputBlendedImage(value=context.blended_image)
+    outputMaskImage = OutputMaskImage(value=context.mask_image)
+    blendOutputs = BlendOutputs(outputBlendedImage=outputBlendedImage, outputMaskImage=outputMaskImage)
+    blendResponse = BlendResponse(outputs=blendOutputs)
+    blendExecutor = BlendExecutor(value=blendResponse)
     executor = ConfigExecutor(value=blendExecutor)
-
-    packageConfigs = PackageConfigs(executor=executor)
+    packageConfigs = PackageConfigs(configExecutor=executor)
     package = PackageHelper(packageModel=PackageModel, packageConfigs=packageConfigs)
-
-    return package.build_model(context)
+    packageModel = package.build_model(context)
+    return packageModel

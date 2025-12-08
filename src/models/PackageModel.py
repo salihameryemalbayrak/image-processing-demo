@@ -1,8 +1,6 @@
-
 from pydantic import Field
 from typing import Optional, Union, Literal
 from sdks.novavision.src.base.model import Package, Config, Inputs, Configs, Outputs, Response, Request, Output, Input, Image
-
 
 class InputImage(Input):
     name: Literal["inputImage"] = "inputImage"
@@ -11,7 +9,6 @@ class InputImage(Input):
 
     class Config:
         title = "Input Image"
-
 
 class InputImageA(Input):
     name: Literal["inputImageA"] = "inputImageA"
@@ -57,39 +54,155 @@ class OutputMaskImage(Output):
     class Config:
         title = "Mask Image"
 
-
-class ConfigEnhanceType(Config):
+class ConfigBrightnessAmount(Config):
     """
-    Which enhancement method to apply
+      Controls how much the brightness of the image will be increased.
     """
-    name: Literal["enhanceType"] = "enhanceType"
-    value: Literal["brightness", "contrast", "sharpen", "blur"]
-    type: Literal["string"] = "string"
-    field: Literal["dropdownlist"] = "dropdownlist"
-
-    class Config:
-        title = "Enhancement Method"
-
-
-class ConfigEnhanceAmount(Config):
-    """
-    Strength of enhancement
-    """
-    name: Literal["enhanceAmount"] = "enhanceAmount"
+    name: Literal["configBrightnessAmount"] = "configBrightnessAmount"
     value: int = Field(default=20, ge=1, le=100)
     type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
 
     class Config:
-        title = "Enhancement Amount"
+        title = "Brightness Amount"
+
+class EnhanceBrightness(Config):
+    name: Literal["brightness"] = "brightness"
+    value: Literal["brightness"] = "brightness"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+    configBrightnessAmount: ConfigBrightnessAmount
+
+    class Config:
+        title = "Brightness"
+
+class Kernel3(Config):
+    name: Literal["kernel3"] = "kernel3"
+    value: Literal["kernel3"] = "kernel3"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+
+
+class Kernel5(Config):
+    name: Literal["kernel5"] = "kernel5"
+    value: Literal["kernel5"] = "kernel5"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+
+class ConfigSharpenKernel(Config):
+    """
+    Selects the kernel size used for the sharpening operation.
+    """
+    name: Literal["configSharpenKernel"] = "configSharpenKernel"
+    value: Union[Kernel3, Kernel5]
+    type: Literal["object"] = "object"
+    field: Literal["dropdownlist"] = "dropdownlist"
+
+    class Config:
+        title = "Sharpen Kernel"
+
+
+class EnhanceSharpen(Config):
+    name: Literal["sharpen"] = "sharpen"
+    value: Literal["sharpen"] = "sharpen"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+    configSharpenKernel: ConfigSharpenKernel
+
+    class Config:
+        title = "Sharpen"
+
+class ConfigEnhanceType(Config):
+    """
+      Determines which enhancement method will be applied to the input image.
+    """
+    name: Literal["configEnhanceType"] = "configEnhanceType"
+    value: Union[EnhanceBrightness, EnhanceSharpen]
+    type: Literal["object"] = "object"
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+
+    class Config:
+        title = "Enhancement Method"
+
+class ConfigBlendStrength(Config):
+    """
+    Defines the blending ratio for alpha-based image mixing.
+    """
+    name: Literal["configBlendStrength"] = "configBlendStrength"
+    value: float = Field(default=0.5, ge=0.0, le=1.0)
+    type: Literal["number"] = "number"
+    field: Literal["textInput"] = "textInput"
+
+    class Config:
+        title = "Blend Strength"
+
+
+class BlendAlpha(Config):
+    name: Literal["alphaBlend"] = "alphaBlend"
+    value: Literal["alphaBlend"] = "alphaBlend"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+    configBlendStrength: ConfigBlendStrength
+
+    class Config:
+        title = "Alpha Blend"
+
+class MaskTrue(Config):
+    name: Literal["True"] = "True"
+    value: Literal[True] = True
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
+
+
+class MaskFalse(Config):
+    name: Literal["False"] = "False"
+    value: Literal[False] = False
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
+
+
+class ConfigUseSmoothMask(Config):
+    """
+      Enables or disables smoothing on the generated blend mask.
+    """
+    name: Literal["configUseSmoothMask"] = "configUseSmoothMask"
+    value: Union[MaskTrue, MaskFalse]
+    type: Literal["object"] = "object"
+    field: Literal["dropdownlist"] = "dropdownlist"
+
+    class Config:
+        title = "Smooth Mask"
+
+
+class BlendMask(Config):
+    name: Literal["maskBlend"] = "maskBlend"
+    value: Literal["maskBlend"] = "maskBlend"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+    configUseSmoothMask: ConfigUseSmoothMask
+
+    class Config:
+        title = "Mask Blend"
+
+
+class ConfigBlendMode(Config):
+    """
+      Selects the blend method to combine two images.
+    """
+    name: Literal["configBlendMode"] = "configBlendMode"
+    value: Union[BlendAlpha, BlendMask]
+    type: Literal["object"] = "object"
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+
+    class Config:
+        title = "Blend Mode"
 
 class EnhanceInputs(Inputs):
     inputImage: InputImage
 
 
 class EnhanceConfigs(Configs):
-    enhanceType: ConfigEnhanceType
-    enhanceAmount: ConfigEnhanceAmount
+    configEnhanceType: ConfigEnhanceType
 
 
 class EnhanceOutputs(Outputs):
@@ -116,32 +229,7 @@ class EnhanceExecutor(Config):
 
     class Config:
         title = "Enhance"
-        json_schema_extra = {
-            "target": {
-                "value": 0
-            }
-        }
-
-
-class ConfigBlendAlpha(Config):
-    name: Literal["blendAlpha"] = "blendAlpha"
-    value: float = Field(default=0.5, ge=0.0, le=1.0)
-    type: Literal["number"] = "number"
-    field: Literal["textInput"] = "textInput"
-
-    class Config:
-        title = "Alpha"
-
-
-class ConfigBlendBeta(Config):
-    name: Literal["blendBeta"] = "blendBeta"
-    value: float = Field(default=0.5, ge=0.0, le=1.0)
-    type: Literal["number"] = "number"
-    field: Literal["textInput"] = "textInput"
-
-    class Config:
-        title = "Beta"
-
+        json_schema_extra = {"target": {"value": 0}}
 
 class BlendInputs(Inputs):
     inputImageA: InputImageA
@@ -149,23 +237,20 @@ class BlendInputs(Inputs):
 
 
 class BlendConfigs(Configs):
-    blendAlpha: ConfigBlendAlpha
-    blendBeta: ConfigBlendBeta
+    configBlendMode: ConfigBlendMode
 
 
 class BlendOutputs(Outputs):
-    outputBlendedImage: OutputBlendedImage   ###iki output nasıl koyacağım
+    outputBlendedImage: OutputBlendedImage
     outputMaskImage: OutputMaskImage
 
 
 class BlendRequest(Request):
-    inputs: Optional[BlendInputs]     #optional nsıl kullanılıcak???
+    inputs: Optional[BlendInputs]
     configs: BlendConfigs
 
     class Config:
-        json_schema_extra = {
-            "target": "configs"
-        }
+        json_schema_extra = {"target": "configs"}
 
 
 class BlendResponse(Response):
@@ -180,27 +265,23 @@ class BlendExecutor(Config):
 
     class Config:
         title = "Blend"
-        json_schema_extra = {
-            "target": {
-                "value": 0
-            }
-        }
-
+        json_schema_extra = {"target": {"value": 0}}
 
 class ConfigExecutor(Config):
-    name: Literal["ConfigExecutor"] = "ConfigExecutor"
+    """
+    Determines which operation (Enhance or Blend) the component will execute.
+    """
+    name: Literal["configExecutor"] = "configExecutor"
     value: Union[EnhanceExecutor, BlendExecutor]
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
     restart: Literal[True] = True      #bu olmalı mı emin değilim
 
     class Config:
-        title = "Type"
-
+        title = "Task"
 
 class PackageConfigs(Configs):
-    executor: ConfigExecutor
-
+    configExecutor: ConfigExecutor
 
 class PackageModel(Package):
     name: Literal["ImageProcessingDemo"] = "ImageProcessingDemo"
