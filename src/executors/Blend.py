@@ -20,22 +20,19 @@ class Blend(Component):
         self.imageA = self.request.get_param("inputImageA")
         self.imageB = self.request.get_param("inputImageB")
 
-        self.blend_mode_cfg = self.request.get_param("configBlendMode")
-        self.mode = self.blend_mode_cfg.get("value")
+        self.mode = self.request.get_param("ConfigBlendMode")
 
-        if self.mode == "alphaBlend":
-            self.strength = self.blend_mode_cfg.get("configBlendStrength")
+        if self.mode == "BlendAlpha":
+            self.strength = self.request.get_param("ConfigBlendStrength")
 
-        elif self.mode == "maskBlend":
-            smooth_cfg = self.blend_mode_cfg.get("configUseSmoothMask", {})
-            self.smooth = smooth_cfg.get("value", False)
+        elif self.mode == "BlendMask":
+            self.smooth = self.request.get_param("ConfigUseSmoothMask")
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
         return {}
 
-    @staticmethod
-    def resize_to_match(A, B):
+    def resize_to_match(self, A, B):
         if A.shape[:2] != B.shape[:2]:
             B = cv2.resize(B, (A.shape[1], A.shape[0]))
         return A, B
@@ -49,35 +46,32 @@ class Blend(Component):
 
         A, B = self.resize_to_match(A, B)
 
-        if self.mode == "alphaBlend":
+        if self.mode == "BlendAlpha":
             alpha = float(self.strength)
             blended = cv2.addWeighted(A, alpha, B, 1 - alpha, 0)
             mask = cv2.absdiff(A, B)
 
-        elif self.mode == "maskBlend":
+        else:
             diff = cv2.absdiff(A, B)
-            mask_gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+            mask = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
 
             if bool(self.smooth):
-                mask_gray = cv2.GaussianBlur(mask_gray, (7, 7), 0)
+                mask = cv2.GaussianBlur(mask, (7, 7), 0)
 
-            mask3 = cv2.cvtColor(mask_gray, cv2.COLOR_GRAY2BGR)
+            mask3 = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
             mask_f = mask3.astype(np.float32) / 255.0
 
-            blended = (A * mask_f + B * (1.0 - mask_f)).astype(np.uint8)
+            blended = (A * mask_f + B * (1 - mask_f)).astype(np.uint8)
             mask = mask3
 
-        else:
-            blended = A
-            mask = np.zeros_like(A)
         imgA.value = blended
-        self.outputBlendedImage = Image.set_frame(imgA, self.uID, self.redis_db)
+        self.blended_image = Image.set_frame(imgA, self.uID, self.redis_db)
 
         imgB.value = mask
-        self.outputMaskImage = Image.set_frame(imgB, self.uID, self.redis_db)
+        self.mask_image = Image.set_frame(imgB, self.uID, self.redis_db)
 
         return build_response_blend(self)
 
 
-if "__main__" == __name__:
+if __name__ == "__main__":
     Executor(sys.argv[1]).run()
