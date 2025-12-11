@@ -65,10 +65,10 @@ class Blend(Component):
             mask = mask3
 
         imgA.value = blended
-        self.blended_image = Image.set_frame(imgA, self.uID, self.redis_db)
+        self.outputBlendedImage = Image.set_frame(imgA, self.uID, self.redis_db)
 
         imgB.value = mask
-        self.mask_image = Image.set_frame(imgB, self.uID, self.redis_db)
+        self.outputMaskImage = Image.set_frame(imgB, self.uID, self.redis_db)
 
         return build_response_blend(self)
 

@@ -56,7 +56,7 @@ class Enhance(Component):
             result = frame
 
         img.value = result
-        self.enhanced_image = Image.set_frame(img, self.uID, self.redis_db)
+        self.outputEnhancedImage = Image.set_frame(img, self.uID, self.redis_db)
 
         return build_response_enhance(self)
 
