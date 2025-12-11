@@ -16,7 +16,7 @@ from components.ImageProcessingDemo.src.models.PackageModel import (
 
 
 def build_response_enhance(context):
-    outputEnhancedImage = OutputEnhancedImage(value=context.enhanced_image)
+    outputEnhancedImage = OutputEnhancedImage(value=context.outputEnhancedImage)
     enhanceOutputs = EnhanceOutputs(outputEnhancedImage=outputEnhancedImage)
     enhanceResponse = EnhanceResponse(outputs=enhanceOutputs)
     enhanceExecutor = EnhanceExecutor(value=enhanceResponse)
@@ -28,9 +28,9 @@ def build_response_enhance(context):
 
 
 def build_response_blend(context):
-    outputBlendedImage = OutputBlendedImage(value=context.blended_image)
-    outputMaskImage = OutputMaskImage(value=context.mask_image)
-    blendOutputs = BlendOutputs(outputBlendedImage=outputBlendedImage, outputMaskImage=outputMaskImage)
+    outputBlendedImage = OutputBlendedImage(value=context.outputBlendedImage)
+    outputMaskImage = OutputMaskImage(value=context.outputMaskImage)
+    blendOutputs = BlendOutputs(outputBlendedImage=outputBlendedImage,outputMaskImage=outputMaskImage)
     blendResponse = BlendResponse(outputs=blendOutputs)
     blendExecutor = BlendExecutor(value=blendResponse)
     executor = ConfigExecutor(value=blendExecutor)

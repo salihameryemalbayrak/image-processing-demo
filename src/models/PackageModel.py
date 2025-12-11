@@ -10,6 +10,7 @@ class InputImage(Input):
     class Config:
         title = "Input Image"
 
+
 class InputImageA(Input):
     name: Literal["inputImageA"] = "inputImageA"
     value: Image
@@ -54,6 +55,7 @@ class OutputMaskImage(Output):
     class Config:
         title = "Mask Image"
 
+
 class ConfigBrightnessAmount(Config):
     """
       Controls how much the brightness of the image will be increased.
@@ -66,6 +68,7 @@ class ConfigBrightnessAmount(Config):
     class Config:
         title = "Brightness Amount"
 
+
 class EnhanceBrightness(Config):
     name: Literal["brightness"] = "brightness"
     value: Literal["brightness"] = "brightness"
@@ -75,6 +78,7 @@ class EnhanceBrightness(Config):
 
     class Config:
         title = "Brightness"
+
 
 class Kernel3(Config):
     name: Literal["kernel3"] = "kernel3"
@@ -88,6 +92,7 @@ class Kernel5(Config):
     value: Literal["kernel5"] = "kernel5"
     type: Literal["string"] = "string"
     field: Literal["option"] = "option"
+
 
 class ConfigSharpenKernel(Config):
     """
@@ -112,6 +117,7 @@ class EnhanceSharpen(Config):
     class Config:
         title = "Sharpen"
 
+
 class ConfigEnhanceType(Config):
     """
       Determines which enhancement method will be applied to the input image.
@@ -123,6 +129,7 @@ class ConfigEnhanceType(Config):
 
     class Config:
         title = "Enhancement Method"
+
 
 class ConfigBlendStrength(Config):
     """
@@ -146,6 +153,7 @@ class BlendAlpha(Config):
 
     class Config:
         title = "Alpha Blend"
+
 
 class MaskTrue(Config):
     name: Literal["True"] = "True"
@@ -197,6 +205,7 @@ class ConfigBlendMode(Config):
     class Config:
         title = "Blend Mode"
 
+
 class EnhanceInputs(Inputs):
     inputImage: InputImage
 
@@ -230,6 +239,7 @@ class EnhanceExecutor(Config):
     class Config:
         title = "Enhance"
         json_schema_extra = {"target": {"value": 0}}
+
 
 class BlendInputs(Inputs):
     inputImageA: InputImageA
@@ -267,11 +277,12 @@ class BlendExecutor(Config):
         title = "Blend"
         json_schema_extra = {"target": {"value": 0}}
 
+
 class ConfigExecutor(Config):
     """
     Determines which operation (Enhance or Blend) the component will execute.
     """
-    name: Literal["configExecutor"] = "configExecutor"
+    name: Literal["ConfigExecutor"] = "ConfigExecutor"
     value: Union[EnhanceExecutor, BlendExecutor]
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
@@ -280,8 +291,9 @@ class ConfigExecutor(Config):
     class Config:
         title = "Task"
 
+
 class PackageConfigs(Configs):
-    configExecutor: ConfigExecutor
+    executor: ConfigExecutor
 
 class PackageModel(Package):
     name: Literal["ImageProcessingDemo"] = "ImageProcessingDemo"

@@ -20,18 +20,22 @@ class Blend(Component):
         self.imageA = self.request.get_param("inputImageA")
         self.imageB = self.request.get_param("inputImageB")
 
-        self.mode = self.request.get_param("configBlendMode")
+        self.blend_mode_cfg = self.request.get_param("configBlendMode")
+        self.mode = self.blend_mode_cfg.get("value")
 
         if self.mode == "alphaBlend":
-            self.strength = self.request.get_param("configBlendStrength")
+            self.strength = self.blend_mode_cfg.get("configBlendStrength")
+
         elif self.mode == "maskBlend":
-            self.smooth = self.request.get_param("configUseSmoothMask")
+            smooth_cfg = self.blend_mode_cfg.get("configUseSmoothMask", {})
+            self.smooth = smooth_cfg.get("value", False)
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
         return {}
 
-    def resize_to_match(self, A, B):
+    @staticmethod
+    def resize_to_match(A, B):
         if A.shape[:2] != B.shape[:2]:
             B = cv2.resize(B, (A.shape[1], A.shape[0]))
         return A, B
@@ -50,21 +54,27 @@ class Blend(Component):
             blended = cv2.addWeighted(A, alpha, B, 1 - alpha, 0)
             mask = cv2.absdiff(A, B)
 
-        else:
+        elif self.mode == "maskBlend":
             diff = cv2.absdiff(A, B)
-            mask = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+            mask_gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+
             if bool(self.smooth):
-                mask = cv2.GaussianBlur(mask, (7, 7), 0)
-            mask3 = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+                mask_gray = cv2.GaussianBlur(mask_gray, (7, 7), 0)
+
+            mask3 = cv2.cvtColor(mask_gray, cv2.COLOR_GRAY2BGR)
             mask_f = mask3.astype(np.float32) / 255.0
-            blended = (A * mask_f + B * (1 - mask_f)).astype(np.uint8)
+
+            blended = (A * mask_f + B * (1.0 - mask_f)).astype(np.uint8)
             mask = mask3
 
+        else:
+            blended = A
+            mask = np.zeros_like(A)
         imgA.value = blended
-        self.blended_image = Image.set_frame(imgA, self.uID, self.redis_db)
+        self.outputBlendedImage = Image.set_frame(imgA, self.uID, self.redis_db)
 
         imgB.value = mask
-        self.mask_image = Image.set_frame(imgB, self.uID, self.redis_db)
+        self.outputMaskImage = Image.set_frame(imgB, self.uID, self.redis_db)
 
         return build_response_blend(self)
 
