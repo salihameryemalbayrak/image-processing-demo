@@ -21,7 +21,7 @@ def build_response_enhance(context):
     enhanceResponse = EnhanceResponse(outputs=enhanceOutputs)
     enhanceExecutor = EnhanceExecutor(value=enhanceResponse)
     executor = ConfigExecutor(value=enhanceExecutor)
-    packageConfigs = PackageConfigs(configExecutor=executor)
+    packageConfigs = PackageConfigs(executor=executor)
     package = PackageHelper(packageModel=PackageModel, packageConfigs=packageConfigs)
     packageModel = package.build_model(context)
     return packageModel
@@ -34,7 +34,7 @@ def build_response_blend(context):
     blendResponse = BlendResponse(outputs=blendOutputs)
     blendExecutor = BlendExecutor(value=blendResponse)
     executor = ConfigExecutor(value=blendExecutor)
-    packageConfigs = PackageConfigs(configExecutor=executor)
+    packageConfigs = PackageConfigs(executor=executor)
     package = PackageHelper(packageModel=PackageModel, packageConfigs=packageConfigs)
     packageModel = package.build_model(context)
     return packageModel
