@@ -58,9 +58,9 @@ class OutputMaskImage(Output):
 
 class ConfigBrightnessAmount(Config):
     """
-      Controls how much the brightness of the image will be increased.
+    Controls how much brightness will be increased.
     """
-    name: Literal["configBrightnessAmount"] = "configBrightnessAmount"
+    name: Literal["ConfigBrightnessAmount"] = "ConfigBrightnessAmount"
     value: int = Field(default=20, ge=1, le=100)
     type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
@@ -69,9 +69,9 @@ class ConfigBrightnessAmount(Config):
         title = "Brightness Amount"
 
 
-class EnhanceBrightness(Config):
-    name: Literal["brightness"] = "brightness"
-    value: Literal["brightness"] = "brightness"
+class Brightness(Config):
+    name: Literal["Brightness"] = "Brightness"
+    value: Literal["Brightness"] = "Brightness"
     type: Literal["string"] = "string"
     field: Literal["option"] = "option"
     configBrightnessAmount: ConfigBrightnessAmount
@@ -81,24 +81,24 @@ class EnhanceBrightness(Config):
 
 
 class Kernel3(Config):
-    name: Literal["kernel3"] = "kernel3"
-    value: Literal["kernel3"] = "kernel3"
+    name: Literal["Kernel3"] = "Kernel3"
+    value: Literal["Kernel3"] = "Kernel3"
     type: Literal["string"] = "string"
     field: Literal["option"] = "option"
 
 
 class Kernel5(Config):
-    name: Literal["kernel5"] = "kernel5"
-    value: Literal["kernel5"] = "kernel5"
+    name: Literal["Kernel5"] = "Kernel5"
+    value: Literal["Kernel5"] = "Kernel5"
     type: Literal["string"] = "string"
     field: Literal["option"] = "option"
 
 
 class ConfigSharpenKernel(Config):
     """
-    Selects the kernel size used for the sharpening operation.
+    Selects kernel size for sharpening.
     """
-    name: Literal["configSharpenKernel"] = "configSharpenKernel"
+    name: Literal["ConfigSharpenKernel"] = "ConfigSharpenKernel"
     value: Union[Kernel3, Kernel5]
     type: Literal["object"] = "object"
     field: Literal["dropdownlist"] = "dropdownlist"
@@ -107,9 +107,9 @@ class ConfigSharpenKernel(Config):
         title = "Sharpen Kernel"
 
 
-class EnhanceSharpen(Config):
-    name: Literal["sharpen"] = "sharpen"
-    value: Literal["sharpen"] = "sharpen"
+class Sharpen(Config):
+    name: Literal["Sharpen"] = "Sharpen"
+    value: Literal["Sharpen"] = "Sharpen"
     type: Literal["string"] = "string"
     field: Literal["option"] = "option"
     configSharpenKernel: ConfigSharpenKernel
@@ -120,10 +120,10 @@ class EnhanceSharpen(Config):
 
 class ConfigEnhanceType(Config):
     """
-      Determines which enhancement method will be applied to the input image.
+    Determines which enhancement method will be applied.
     """
-    name: Literal["configEnhanceType"] = "configEnhanceType"
-    value: Union[EnhanceBrightness, EnhanceSharpen]
+    name: Literal["ConfigEnhanceType"] = "ConfigEnhanceType"
+    value: Union[Brightness, Sharpen]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
@@ -135,7 +135,7 @@ class ConfigBlendStrength(Config):
     """
     Defines the blending ratio for alpha-based image mixing.
     """
-    name: Literal["configBlendStrength"] = "configBlendStrength"
+    name: Literal["ConfigBlendStrength"] = "ConfigBlendStrength"
     value: float = Field(default=0.5, ge=0.0, le=1.0)
     type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
@@ -145,8 +145,8 @@ class ConfigBlendStrength(Config):
 
 
 class BlendAlpha(Config):
-    name: Literal["alphaBlend"] = "alphaBlend"
-    value: Literal["alphaBlend"] = "alphaBlend"
+    name: Literal["BlendAlpha"] = "BlendAlpha"
+    value: Literal["BlendAlpha"] = "BlendAlpha"
     type: Literal["string"] = "string"
     field: Literal["option"] = "option"
     configBlendStrength: ConfigBlendStrength
@@ -173,7 +173,7 @@ class ConfigUseSmoothMask(Config):
     """
       Enables or disables smoothing on the generated blend mask.
     """
-    name: Literal["configUseSmoothMask"] = "configUseSmoothMask"
+    name: Literal["ConfigUseSmoothMask"] = "ConfigUseSmoothMask"
     value: Union[MaskTrue, MaskFalse]
     type: Literal["object"] = "object"
     field: Literal["dropdownlist"] = "dropdownlist"
@@ -183,8 +183,8 @@ class ConfigUseSmoothMask(Config):
 
 
 class BlendMask(Config):
-    name: Literal["maskBlend"] = "maskBlend"
-    value: Literal["maskBlend"] = "maskBlend"
+    name: Literal["BlendMask"] = "BlendMask"
+    value: Literal["BlendMask"] = "BlendMask"
     type: Literal["string"] = "string"
     field: Literal["option"] = "option"
     configUseSmoothMask: ConfigUseSmoothMask
@@ -195,9 +195,9 @@ class BlendMask(Config):
 
 class ConfigBlendMode(Config):
     """
-      Selects the blend method to combine two images.
+    Selects the blending method.
     """
-    name: Literal["configBlendMode"] = "configBlendMode"
+    name: Literal["ConfigBlendMode"] = "ConfigBlendMode"
     value: Union[BlendAlpha, BlendMask]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
@@ -280,7 +280,7 @@ class BlendExecutor(Config):
 
 class ConfigExecutor(Config):
     """
-    Determines which operation (Enhance or Blend) the component will execute.
+    Determines which task will run.
     """
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
     value: Union[EnhanceExecutor, BlendExecutor]
